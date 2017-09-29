@@ -20,7 +20,14 @@
 
 <!-- Custom CSS -->
 <link href="stylish-portfolio.css" rel="stylesheet">
-<link rel="stylesheet" href="log.css"></head>
+<link rel="stylesheet" href="log.css">
+<script src="jquery-3.2.1.min.js">
+</script>
+
+
+
+	
+	</head>
 <body>
 <a id="menu-toggle" href="#" class="btn btn-dark btn-lg toggle">
 <i class="fa fa-bars"></i>
@@ -32,6 +39,7 @@
 </a>
 <li class="sidebar-brand">
 <a class="js-scroll-trigger">  <?php
+$stat=0; 
 session_id("log");
 session_start();
 if(isset($_SESSION["uid"]))
@@ -97,8 +105,8 @@ if(isset($_SESSION["uid"]))
     </nav>
     <div class="w3-card-2 w3-margin">
     <?php 
-   
-   
+   $stat; $us;
+    $avid;
     $not=$_SESSION["uid"];
     $servername="localhost";
     $username="root";
@@ -107,17 +115,78 @@ if(isset($_SESSION["uid"]))
     $con=mysqli_connect($servername,$username,$password,$database);
     $sql="SELECT * FROM (SELECT * FROM messages ORDER BY time DESC )messages WHERE guideId='$not' ";
     $result=mysqli_query($con, $sql);
+    
+    if($_SERVER['REQUEST_METHOD']=='POST')
+    {
+    if(isset($_POST['confirm']))
+    {   
+    	
+    	 $id=$_POST['confirm'];
+    	 $sql6="SELECT * FROM messages WHERE id='$id' ";
+    	 $result3=mysqli_query($con, $sql6);
+         $msg=" has accepted your request. Have a nice journey";
+         $gui=$_SESSION["name"];
+         $today = date("F j, Y, g:i a");
+         while($row4 = mysqli_fetch_assoc($result3)) { $us= $row4["Name"];}
+    	$sql="INSERT INTO booked
+    	( guideId, Message, userId, date, status, id)
+    	VALUES( '$gui', '$msg','$us','$today', '1', '$id')";
+			mysqli_query($con, $sql);
+			
+			$sq="UPDATE messages SET status='1' WHERE id='$id'";
+			mysqli_query($con, $sq);
+			}
+			if(isset($_POST['cancel']))
+			{   $id=$_POST['cancel'];
+				$s="DELETE FROM messages WHERE id='$id'";
+				mysqli_query($con, $s);
+				
+			}
+    }
+			
+    
+    $sql1="SELECT * FROM (SELECT * FROM booked ORDER BY date DESC )booked WHERE userId='$not' ";
+    $result1=mysqli_query($con, $sql1);
     // output data of each row
     while($row = mysqli_fetch_assoc($result)) {?>
-    	
+    	<form method="post">
 		<ul class="w3-ul w3-hoverable w3-white">
             <li class="w3-padding-16">
              <span class="w3-large">
-              <span><?php echo $row["Message"];?> </span>
+              <span><?php echo $row["Message"]."AVAILIBILITY ID: ".$row["id"];?> </span>
               <span class="w3-padding-large w3-right"><?php echo $row["time"];?> </span>
               </span>
+              <span id="text" class="w3-padding-large w3-right"></span>
+            <?php $n1=$row["id"];
+            $sql_="SELECT * FROM messages WHERE id='$n1' ";
+            $result_=mysqli_query($con, $sql_);
+            while($_row_ = mysqli_fetch_assoc($result_)) { $stat= $_row_["status"];}
+            if($stat!=1){
+              ?>
+               <button type="submit" name="confirm" value="<?php echo $row['id'];?>" id="confirm" >Confirm him</button>
+              <button type="submit" name="cancel" value="<?php echo $row['id'];?>" id="cancel">Cancel</button>
+              <?php }
+              else {
+              ?> <button disabled="disabled">Booked</button><?php }?>
               </li>
+              
               </ul>
+              </form>
+    <?php }
+    
+    while($row1 = mysqli_fetch_assoc($result1)) {?>
+    	<form method="post">
+		<ul class="w3-ul w3-hoverable w3-white">
+            <li class="w3-padding-16">
+             <span class="w3-large">
+              <span><?php echo $row1["guideId"].$row1["Message"];?> </span>
+              <span class="w3-padding-large w3-right"><?php echo $row1["date"];?> </span>
+              </span>
+              
+              </li>
+              
+              </ul>
+              </form>
     <?php }
     ?>
     </div>

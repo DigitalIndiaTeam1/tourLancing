@@ -23,6 +23,7 @@ session_start();
 if(isset($_SESSION["uid"]))
 {   $name=$_SESSION['uid'];
 			session_write_close();
+			$avid= $_POST["request"];
 			$servername="localhost";
 			$username="root";
 			$password="";
@@ -31,11 +32,11 @@ if(isset($_SESSION["uid"]))
 			session_start();
 			 $gui=$_SESSION['idd'];
 			 $today = date("F j, Y, g:i a");
-			 $msg= " tried to book you as a tourLancer for his tour on. All the Best! Hope you perform your best to make tourists satisfied.";
+			 $msg= $name." tried to book you as a tourLancer for his tour on. All the Best! Hope you perform your best to make tourists satisfied.";
 			$con=mysqli_connect($servername,$username,$password,$database);
 			$sql="INSERT INTO messages
-            ( Name, Message, guideId, time)
-			VALUES( '$name', '$msg','$gui','$today')";
+            ( Name, Message, guideId, time, id, status )
+			VALUES( '$name', '$msg','$gui','$today', '$avid', '0')";
 			mysqli_query($con, $sql);?>
 			
 			<body>
